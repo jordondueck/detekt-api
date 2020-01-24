@@ -1,4 +1,6 @@
 const express = require("express");
+const bcrypt = require('bcryptjs');
+const cors = require('cors');
 const app = express();
 const port = 3000;
 
@@ -24,6 +26,7 @@ const database = {
 };
 
 app.use(express.json());
+app.use(cors())
 
 app.get("/", (req, res) => res.send(database.users));
 
@@ -40,11 +43,15 @@ app.post("/signin", (req, res) => {
 
 app.post("/register", (req, res) => {
   const { name, email, password } = req.body;
+  bcrypt.hash(password, 8, function(err, hash) {
+    console.log('hash' , hash);
+  });
+  
   database.users.push({
     id: "003",
     name: name,
     email: email,
-    password: password,
+    password: hash,
     entries: 0,
     joined: new Date()
   });
