@@ -32,10 +32,16 @@ app.get("/", (req, res) => res.send(database.users));
 
 app.post("/signin", (req, res) => {
   if (
-    req.body.email === database.users[0].email &&
-    req.body.password === database.users[0].password
+    req.body.email === database.users[database.users.length-1].email &&
+    bcrypt.compareSync(req.body.password, database.users[database.users.length-1].password)
   ) {
-    res.json("Successfully logged in");
+    res.status(200).json({
+      id: database.users[database.users.length-1].id,
+      name: database.users[database.users.length-1].name,
+      email: database.users[database.users.length-1].email,
+      entries: database.users[database.users.length-1].entries,
+      joined: database.users[database.users.length-1].joined
+    });
   } else {
     res.status(400).json("Error loggin in");
   }
@@ -43,9 +49,9 @@ app.post("/signin", (req, res) => {
 
 app.post("/register", (req, res) => {
   const { name, email, password } = req.body;
-  bcrypt.hash(password, 8, function(err, hash) {
-    console.log('hash' , hash);
-  });
+  console.log('req.body' , req.body);
+  const hash = bcrypt.hashSync(password, 8);
+  console.log('hash' , hash);
   
   database.users.push({
     id: "003",
@@ -55,7 +61,7 @@ app.post("/register", (req, res) => {
     entries: 0,
     joined: new Date()
   });
-  res.json(name + " successfully registered");
+  res.json("Successfully registered");
 });
 
 app.get("/profile/:id", (req, res) => {
