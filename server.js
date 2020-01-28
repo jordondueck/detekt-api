@@ -21,11 +21,13 @@ app.use(cors());
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 app.get("/", (req, res) => {
-  db.select("*")
+  const { email } = req.body;
+  db.select("accountid", "firstname", "email")
     .from("account")
-    .then(data => {
-      console.log(data);
-      res.status(200).json(data);
+    .where("email", "=", email)
+    .then(user => {
+      console.log(user);
+      res.status(200).json(user);
     });
 });
 
@@ -38,7 +40,9 @@ app.post("/signin", (req, res) => {
       const isValid = bcrypt.compareSync(password, user[0].password);
       if (isValid) {
         console.log(user[0]);
-        res.status(200).json({ email: user[0].email });
+        res
+          .status(200)
+          .json({ email: user[0].email, accountid: user[0].accountid });
       } else {
         res.status(400).json("Error loggin in (incorrect credentials).");
       }
