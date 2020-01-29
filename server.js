@@ -1,17 +1,22 @@
+require('dotenv').config();
+
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const cors = require("cors");
 const app = express();
-const port = 3000;
 const knex = require("knex");
+const port = 3000;
+
+const register = require("./controllers/register");
+const signIn = require("./controllers/signin");
 
 const db = knex({
   client: "pg",
   connection: {
-    host: "127.0.0.1",
-    user: "",
-    password: "",
-    database: ""
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME
   }
 });
 
@@ -32,48 +37,11 @@ app.get("/", (req, res) => {
 });
 
 app.post("/signin", (req, res) => {
-  const { email, password } = req.body;
-  db.select("*")
-    .from("account")
-    .where("email", "=", email)
-    .then(user => {
-      const isValid = bcrypt.compareSync(password, user[0].password);
-      if (isValid) {
-        console.log(user[0]);
-        res
-          .status(200)
-          .json({ email: user[0].email, accountid: user[0].accountid });
-      } else {
-        res.status(400).json("Error loggin in (incorrect credentials).");
-      }
-    })
-    .catch(err => {
-      res.status(400).json("Error loggin in (incorrect credentials).");
-    });
+  signIn.handleSignIn(req, res, db, bcrypt);
 });
 
 app.post("/register", (req, res) => {
-  const { firstname, lastname, email, password } = req.body;
-  console.log("req.body", req.body);
-  const hash = bcrypt.hashSync(password);
-  console.log("hash", hash);
-  db("account")
-    .insert({
-      firstname: firstname,
-      lastname: lastname,
-      email: email,
-      password: hash,
-      joined: new Date()
-    })
-    .returning("*")
-    .then(user => {
-      res.status(200).json("Successfully registered.");
-    })
-    .catch(err =>
-      res
-        .status(400)
-        .json("A problem occurred during registration. Please try again.")
-    );
+  register.handleRegister(req, res, db, bcrypt);
 });
 
 app.get("/profile/:accountid", (req, res) => {
