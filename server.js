@@ -30,7 +30,7 @@ app.use(cors());
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 app.get("/", (req, res) => {
-  home.handleHome(req, res, db);
+  res.send('Online')
 });
 
 app.post("/signin", (req, res) => {
