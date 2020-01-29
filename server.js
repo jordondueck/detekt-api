@@ -27,7 +27,7 @@ const db = knex({
 app.use(express.json());
 app.use(cors());
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+app.listen(process.env.PORT || port, () => console.log(`Example app listening on port ${port}!`));
 
 app.get("/", (req, res) => {
   res.send('Online')
