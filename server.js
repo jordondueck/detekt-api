@@ -7,8 +7,11 @@ const app = express();
 const knex = require("knex");
 const port = 3000;
 
+const home = require("./controllers/home");
 const register = require("./controllers/register");
 const signIn = require("./controllers/signin");
+const image = require("./controllers/image");
+const profile = require("./controllers/profile");
 
 const db = knex({
   client: "pg",
@@ -26,14 +29,7 @@ app.use(cors());
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 app.get("/", (req, res) => {
-  const { email } = req.body;
-  db.select("accountid", "firstname", "email")
-    .from("account")
-    .where("email", "=", email)
-    .then(user => {
-      console.log(user);
-      res.status(200).json(user);
-    });
+  home.handleHome(req, res, db);
 });
 
 app.post("/signin", (req, res) => {
@@ -45,33 +41,9 @@ app.post("/register", (req, res) => {
 });
 
 app.get("/profile/:accountid", (req, res) => {
-  const { accountid } = req.params;
-  db.select("*")
-    .from("account")
-    .where({ accountid: accountid })
-    .then(user => {
-      if (user.length) {
-        res.status(200).json(user[0]);
-      } else {
-        res.status(400).json("Error retrieving user data.");
-      }
-    })
-    .catch(err => res.status(400).json("Error retrieving user data."));
+  profile.handleProfile(req, res, db);
 });
 
 app.post("/image", (req, res) => {
-  const { itemsdetected, accountid } = req.body;
-  db("scan")
-    .insert({
-      itemsdetected: itemsdetected,
-      accountid: accountid
-    })
-    .returning("*")
-    .then(scan => {
-      res.status(200).json("Scan complete.");
-      console.log(scan[0]);
-    })
-    .catch(err =>
-      res.status(400).json("Could not complete scan. Please try again.")
-    );
+  image.handleImage(req, res, db);
 });
