@@ -5,14 +5,15 @@ const bcrypt = require("bcryptjs");
 const cors = require("cors");
 const app = express();
 const knex = require("knex");
-const port = 3000;
 
 const home = require("./controllers/home");
 const register = require("./controllers/register");
 const signIn = require("./controllers/signin");
-const image = require("./controllers/image");
 const profile = require("./controllers/profile");
+const clarifai = require("./controllers/clarifai");
+const image = require("./controllers/image");
 
+const port = 3000;
 const db = knex({
   client: "pg",
   connection: {
@@ -42,6 +43,10 @@ app.post("/register", (req, res) => {
 
 app.get("/profile/:accountid", (req, res) => {
   profile.handleProfile(req, res, db);
+});
+
+app.post("/clarifai", (req, res) => {
+  clarifai.handleAPICall(req, res);
 });
 
 app.post("/image", (req, res) => {
